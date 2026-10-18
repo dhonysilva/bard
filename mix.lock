@@ -1,3 +1,4 @@
 %{
   "boundary": {:hex, :boundary, "0.11.0", "56cff565b5565930765e02782281b022935fe8c2e1504543c8c1b44b85893b40", [:mix], [], "hexpm", "b9297a96ea14c0e63dbd77b8135e0d483f9c6f34ed1c9dee4b3fea82c596f55a"},
+  "libgraph": {:hex, :libgraph, "0.16.0", "3936f3eca6ef826e08880230f806bfea13193e49bf153f93edcf0239d4fd1d07", [:mix], [], "hexpm", "41ca92240e8a4138c30a7e06466acc709b0cbb795c643e9e17174a178982d6bf"},
 }
