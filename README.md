@@ -4,6 +4,17 @@ Config → Node → Graph → Project → Loader → Loader.Manifest
                                        ↘
            Selector.Parser → Selector → CLI → CLI.Ls → mix bard.ls → Parity
 
+
+```
+iex -S mix
+```
+
+```
+Bard.Project.load(Bard.Loader.Manifest, project_dir: "test/fixtures/jaffle_shop")
+```
+
+Return a project with its graph built.
+
 **TODO: Add description**
 
 ## Installation
