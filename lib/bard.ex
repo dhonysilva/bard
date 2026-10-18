@@ -15,4 +15,6 @@ defmodule Bard do
   def hello do
     :world
   end
+
+  use Boundary, deps: [], exports: []
 end
