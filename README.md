@@ -1,5 +1,9 @@
 # Bard
 
+Config → Node → Graph → Project → Loader → Loader.Manifest
+                                       ↘
+           Selector.Parser → Selector → CLI → CLI.Ls → mix bard.ls → Parity
+
 **TODO: Add description**
 
 ## Installation
@@ -18,4 +22,3 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/bard>.
-

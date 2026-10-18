@@ -16,5 +16,5 @@ defmodule Bard do
     :world
   end
 
-  use Boundary, deps: [], exports: []
+  use Boundary, deps: [], exports: [Config, Graph, Node]
 end
