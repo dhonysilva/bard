@@ -22,7 +22,7 @@ defmodule Bard.CLI.Ls do
   def run(%Project{} = project, opts) do
     output = Keyword.get(opts, :output, :selector)
 
-    with {:ok, ids} <- Selector.select(project, opts) do
+    with {:ok, ids} <- Selector.select(project, Keyword.delete(opts, :output)) do
       lines =
         ids
         |> Enum.map(&project.nodes[&1])
