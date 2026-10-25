@@ -20,6 +20,7 @@ defmodule Bard.Node do
           source_name: String.t() | nil,
           raw_code: String.t() | nil,
           compiled_code: String.t() | nil,
+          relation_name: String.t() | nil,
           checksum: String.t() | nil,
           depends_on: [String.t()],
           config: Bard.Config.t(),
@@ -27,7 +28,6 @@ defmodule Bard.Node do
         }
 
   @enforce_keys [:unique_id, :resource_type, :name, :package]
-
   defstruct [
     :unique_id,
     :resource_type,
@@ -39,6 +39,7 @@ defmodule Bard.Node do
     :source_name,
     :raw_code,
     :compiled_code,
+    :relation_name,
     :checksum,
     fqn: [],
     depends_on: [],
