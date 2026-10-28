@@ -5,7 +5,19 @@ defmodule Bard.CLI do
   binary (Burrito or an escript) with no change.
   """
 
-  use Boundary, top_level?: true, deps: [Bard, Bard.Loader, Bard.Selector], exports: [Ls]
+  use Boundary,
+    top_level?: true,
+    deps: [
+      Bard,
+      Bard.Loader,
+      Bard.Selector,
+      Bard.Profile,
+      Bard.Adapter,
+      Bard.Build,
+      Bard.Runner,
+      Bard.RunResults
+    ],
+    exports: [Ls, Run]
 
   alias Bard.Loader
   alias Bard.Project
