@@ -33,6 +33,7 @@ defmodule Bard.MixProject do
       {:libgraph, "~> 0.16"},
       {:telemetry, "~> 1.2"},
       {:postgrex, "~> 0.19"},
+      {:yaml_elixir, "~> 2.9"},
       {:boundary, "~> 0.10", runtime: false}
     ]
   end
