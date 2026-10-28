@@ -129,7 +129,8 @@ defmodule Bard.CLI.Run do
   end
 
   defp progress(config, text) do
-    n = :counters.add(config.counter, 1, 1) && :counters.get(config.counter, 1)
+    :counters.add(config.counter, 1, 1)
+    n = :counters.get(config.counter, 1)
     width = config.total |> Integer.to_string() |> String.length()
     "#{n |> Integer.to_string() |> String.pad_leading(width)} of #{config.total}  #{text}"
   end

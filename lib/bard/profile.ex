@@ -65,7 +65,6 @@ defmodule Bard.Profile do
       {:ok, %{} = map} -> {:ok, map}
       {:ok, _other} -> {:error, {:invalid_yaml, path}}
       {:error, %{message: message}} -> {:error, {:yaml_error, path, message}}
-      {:error, reason} -> {:error, {:yaml_error, path, reason}}
     end
   end
 
