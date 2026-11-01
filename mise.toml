@@ -1,0 +1,45 @@
+[tools]
+erlang = "27"
+elixir = "1.18-otp-27"
+# Python + dbt to run the existing dbt project and compare results with Bard
+python = "3.12"
+
+[env]
+# Points to the existing dbt project that Bard will read/parse (adjust the path)
+BARD_DBT_PROJECT_DIR = "./dbt_project"
+# Automatically activates the Python venv (created with `mise run dbt:setup`)
+_.python.venv = { path = ".venv", create = true }
+# Local variables/secrets go in mise.local.toml (add it to .gitignore)
+
+[tasks.setup]
+description = "Install Elixir dependencies"
+run = "mix local.hex --force && mix local.rebar --force && mix deps.get"
+
+[tasks.compile]
+description = "Compile the project"
+run = "mix compile"
+
+[tasks.test]
+description = "Run the tests"
+run = "mix test"
+
+[tasks.format]
+description = "Format the code"
+run = "mix format"
+
+[tasks.lint]
+description = "Check formatting and compile with warnings as errors"
+run = ["mix format --check-formatted", "mix compile --warnings-as-errors"]
+
+[tasks.iex]
+description = "Open IEx with the project loaded"
+run = "iex -S mix"
+
+[tasks."dbt:setup"]
+description = "Install dbt in the local venv (adjust the adapter)"
+run = "pip install dbt-core dbt-postgres"
+
+[tasks."dbt:parse"]
+description = "Generate dbt's manifest.json, useful as a reference for Bard's parser"
+dir = "{{env.BARD_DBT_PROJECT_DIR}}"
+run = "dbt parse"
