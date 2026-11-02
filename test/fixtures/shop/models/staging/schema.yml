@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: One row per customer.
+    config:
+      tags: ["pii"]
+  - name: stg_orders
+    columns:
+      - name: order_id
+        tests:
+          - unique
+          - not_null

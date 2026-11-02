@@ -1,0 +1,12 @@
+shop:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('BARD_TEST_PG_HOST', 'localhost') }}"
+      port: "{{ env_var('BARD_TEST_PG_PORT', '5432') | int }}"
+      user: "{{ env_var('BARD_TEST_PG_USER', 'postgres') }}"
+      password: "{{ env_var('BARD_TEST_PG_PASSWORD', 'postgres') }}"
+      dbname: "{{ env_var('BARD_TEST_PG_DB', 'bard') }}"
+      schema: shop_dev
+      threads: 4
