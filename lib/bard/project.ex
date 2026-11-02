@@ -21,7 +21,7 @@ defmodule Bard.Project do
           graph: Graph.t() | nil
         }
 
-  defstruct [:name, :root, :dbt_version, :schema_version, :graph, nodes: %{}]
+  defstruct [:name, :root, :dbt_version, :schema_version, :graph, nodes: %{}, diagnostics: []]
 
   @doc """
   Loads a project with the given loader and builds its graph.

@@ -132,6 +132,7 @@ defmodule Bard.Loader.Manifest do
       original_file_path: raw["original_file_path"],
       raw_code: raw["raw_code"],
       compiled_code: raw["compiled_code"],
+      compiled_by: if(raw["compiled_code"], do: :dbt),
       checksum: get_in(raw, ["checksum", "checksum"]),
       depends_on: get_in(raw, ["depends_on", "nodes"]) || [],
       config: config(raw),
