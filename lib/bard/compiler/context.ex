@@ -30,13 +30,13 @@ defmodule Bard.Compiler.Context do
 
     * `:target` - a resolved `Bard.Profile` target
     * `:vars` - project vars merged with `--vars` overrides
-    * `:project_name`
+    * `:project_name` - `nil` while `dbt_project.yml` itself is rendered
     * `:macros` - the project's macros by name
   """
   @type env :: %{
           target: map(),
           vars: map(),
-          project_name: String.t(),
+          project_name: String.t() | nil,
           macros: map()
         }
 
