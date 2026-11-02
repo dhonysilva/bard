@@ -24,3 +24,6 @@ bard-*.tar
 
 # Venv folders
 .venv
+
+# Local mise overrides and secrets
+mise.local.toml
