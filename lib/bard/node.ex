@@ -40,6 +40,9 @@ defmodule Bard.Node do
     :raw_code,
     :compiled_code,
     :relation_name,
+    # Who produced `compiled_code`: dbt (manifest loader, or the compiler's
+    # fallback) or Bard's own compiler.
+    :compiled_by,
     :checksum,
     fqn: [],
     depends_on: [],

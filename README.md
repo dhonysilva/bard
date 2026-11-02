@@ -91,7 +91,8 @@ Dependencies (see `mix.exs`):
 - `jason` for JSON, `libgraph` for the lineage graph
 - `telemetry` for build progress events
 - `postgrex` for the Postgres adapter
-- `yaml_elixir` for reading `profiles.yml`.
+- `yaml_elixir` for reading `profiles.yml` and `dbt_project.yml`
+- `nimble_options` for validating `dbt_project.yml`.
 
 ## Quickstart: run it against a real project
 

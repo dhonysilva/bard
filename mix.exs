@@ -34,6 +34,7 @@ defmodule Bard.MixProject do
       {:telemetry, "~> 1.2"},
       {:postgrex, "~> 0.19"},
       {:yaml_elixir, "~> 2.9"},
+      {:nimble_options, "~> 1.1"},
       {:boundary, "~> 0.10", runtime: false}
     ]
   end
