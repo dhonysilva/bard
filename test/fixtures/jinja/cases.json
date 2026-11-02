@@ -1,0 +1,178 @@
+{
+  "_globals": {
+    "cfg": {
+      "schema": "marts",
+      "tags": [
+        "x"
+      ]
+    },
+    "flag": true,
+    "items": [
+      "a",
+      "b",
+      "c"
+    ],
+    "n": 7,
+    "name": "orders",
+    "nothing": null,
+    "pairs": [
+      [
+        "k1",
+        1
+      ],
+      [
+        "k2",
+        2
+      ]
+    ],
+    "price": 2.5
+  },
+  "break_continue": {
+    "expected": "1-3-4",
+    "template": "{% for i in [1,2,3,4,5] %}{% if i == 2 %}{% continue %}{% endif %}{{ i }}{% if i == 4 %}{% break %}{% endif %}-{% endfor %}"
+  },
+  "comment": {
+    "expected": "abc",
+    "template": "a{# hidden #}b {#- trims -#}   c"
+  },
+  "comparisons": {
+    "expected": "True True True True True",
+    "template": "{{ n > 5 }} {{ n == 7.0 }} {{ 'b' in items }} {{ 'z' not in items }} {{ 'ab' < 'b' }}"
+  },
+  "concat": {
+    "expected": "a1None xy",
+    "template": "{{ 'a' ~ 1 ~ none }} {{ 'x' + 'y' }}"
+  },
+  "conditional_expr": {
+    "expected": "big []",
+    "template": "{{ 'big' if n > 5 else 'small' }} [{{ 'x' if false }}]"
+  },
+  "dict_access": {
+    "expected": "marts ['x'] dflt marts",
+    "template": "{{ cfg.schema }} {{ cfg['tags'] }} {{ cfg.get('nope', 'dflt') }} {{ cfg.get('schema') }}"
+  },
+  "do": {
+    "expected": "ok",
+    "template": "{% set l = [] %}{% do cfg.get('x') %}ok"
+  },
+  "filters": {
+    "expected": "HI a, b, c 3 a_b d 43 3.0 a c",
+    "template": "{{ ' Hi ' | trim | upper }} {{ items | join(', ') }} {{ items | length }} {{ 'a-b' | replace('-', '_') }} {{ missing | default('d') }} {{ '42' | int + 1 }} {{ 3 | float }} {{ items | first }} {{ items | last }}"
+  },
+  "for_dict": {
+    "expected": "b",
+    "template": "{% for k in {'b': 1} %}{{ k }}{% endfor %}"
+  },
+  "for_else": {
+    "expected": "empty",
+    "template": "{% for i in [] %}x{% else %}empty{% endfor %}"
+  },
+  "for_filter": {
+    "expected": "24",
+    "template": "{% for i in [1,2,3,4] if i is even %}{{ i }}{% endfor %}"
+  },
+  "for_loop": {
+    "expected": "1:a, 2:b, 3:c",
+    "template": "{% for i in items %}{{ loop.index }}:{{ i }}{% if not loop.last %}, {% endif %}{% endfor %}"
+  },
+  "for_meta": {
+    "expected": "0True33 1False32 2False31 ",
+    "template": "{% for i in items %}{{ loop.index0 }}{{ loop.first }}{{ loop.length }}{{ loop.revindex }} {% endfor %}"
+  },
+  "for_unpack": {
+    "expected": "k1=1;k2=2;",
+    "template": "{% for k, v in pairs %}{{ k }}={{ v }};{% endfor %}"
+  },
+  "if_chain": {
+    "expected": "mid",
+    "template": "{% if n < 5 %}low{% elif n < 10 %}mid{% else %}high{% endif %}"
+  },
+  "jaffle_orders": {
+    "expected": "\n\nselect\n        order_id,\n\n        sum(case when payment_method = 'credit_card' then amount else 0 end) as credit_card_amount,\n        sum(case when payment_method = 'coupon' then amount else 0 end) as coupon_amount,\n        sum(amount) as total_amount",
+    "template": "{% set payment_methods = ['credit_card', 'coupon'] %}\n\nselect\n        order_id,\n\n        {% for payment_method in payment_methods -%}\n        sum(case when payment_method = '{{ payment_method }}' then amount else 0 end) as {{ payment_method }}_amount,\n        {% endfor -%}\n\n        sum(amount) as total_amount\n"
+  },
+  "keep_inner_newlines": {
+    "expected": "\na\n\nb\n\nc\n",
+    "template": "{% for i in items %}\n{{ i }}\n{% endfor %}\n"
+  },
+  "logic": {
+    "expected": "yes fallback False last",
+    "template": "{{ flag and 'yes' }} {{ nothing or 'fallback' }} {{ not flag }} {{ 0 or [] or 'last' }}"
+  },
+  "macro": {
+    "expected": "round(amount, 2) round(x, 4) round(y, 0)",
+    "template": "{% macro m(col, scale=2) -%}\n  round({{ col }}, {{ scale }})\n{%- endmacro %}{{ m('amount') }} {{ m('x', scale=4) }} {{ m('y', 0) }}"
+  },
+  "macro_kw_default_expr": {
+    "expected": "q_x",
+    "template": "{% macro m(a, b=a ~ '_x') %}{{ b }}{% endmacro %}{{ m('q') }}"
+  },
+  "math": {
+    "expected": "7 3 3.5 1 1024 -6",
+    "template": "{{ 1 + 2 * 3 }} {{ 7 // 2 }} {{ 7 / 2 }} {{ 7 % 3 }} {{ 2 ** 10 }} {{ -n + 1 }}"
+  },
+  "methods": {
+    "expected": "ORDERS x ['a', 'b'] True a, b, c",
+    "template": "{{ name.upper() }} {{ ' x '.strip() }} {{ 'a,b'.split(',') }} {{ name.startswith('or') }} {{ ', '.join(items) }}"
+  },
+  "nested_data": {
+    "expected": "{'a': [1, {'b': None}]}",
+    "template": "{{ {'a': [1, {'b': none}]} }}"
+  },
+  "output": {
+    "expected": "select orders from t",
+    "template": "select {{ name }} from t"
+  },
+  "python_str": {
+    "expected": "None True False [1, 'a', None] ['a', 'b', 'c'] 2.5 3.0",
+    "template": "{{ none }} {{ true }} {{ false }} {{ [1, 'a', none] }} {{ items }} {{ price }} {{ 3.0 }}"
+  },
+  "raw": {
+    "expected": "{{ not rendered }}",
+    "template": "{% raw %}{{ not rendered }}{% endraw %}"
+  },
+  "set_block": {
+    "expected": "[select 7]",
+    "template": "{% set sql %}select {{ n }}{% endset %}[{{ sql }}]"
+  },
+  "set_if_leaks": {
+    "expected": "5",
+    "template": "{% if true %}{% set y = 5 %}{% endif %}{{ y }}"
+  },
+  "set_scope": {
+    "expected": "2221",
+    "template": "{% set x = 1 %}{% for i in items %}{% set x = 2 %}{{ x }}{% endfor %}{{ x }}"
+  },
+  "set_tuple": {
+    "expected": "12",
+    "template": "{% set a, b = [1, 2] %}{{ a }}{{ b }}"
+  },
+  "string_escapes": {
+    "expected": "it's say \"hi\" ab",
+    "template": "{{ 'it\\'s' }} {{ \"say \\\"hi\\\"\" }} {{ 'a' 'b' }}"
+  },
+  "tests": {
+    "expected": "True True True True True",
+    "template": "{{ nothing is none }} {{ n is number }} {{ name is string }} {{ cfg is mapping }} {{ n is not none }}"
+  },
+  "text": {
+    "expected": "plain text, no tags",
+    "template": "plain text, no tags"
+  },
+  "trailing_newline": {
+    "expected": "line",
+    "template": "line\n"
+  },
+  "undefined": {
+    "expected": "[] False True",
+    "template": "[{{ missing }}] {{ missing is defined }} {{ missing is undefined }}"
+  },
+  "ws_control": {
+    "expected": "abc",
+    "template": "a  \n  {%- if true -%}  \n  b  \n  {%- endif -%}\n  c"
+  },
+  "ws_output": {
+    "expected": "x y z",
+    "template": "x {{- ' y ' -}} z"
+  }
+}
