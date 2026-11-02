@@ -15,6 +15,73 @@ Bard can also build your models: `mix bard.run` takes the SQL dbt already compil
 
 Requires Elixir `~> 1.18` and a dbt project you can run `dbt parse` (and, for `bard.run`, `dbt compile`) against.
 
+### With mise (recommended)
+
+The repository pins its toolchain in `mise.toml` with [mise](https://mise.jdx.dev): Erlang 27, Elixir 1.18 (OTP 27) and Python 3.12 (used to run dbt alongside Bard).
+
+1. Install mise and hook it into your shell (see the [mise getting started guide](https://mise.jdx.dev/getting-started.html)):
+
+   ```shell
+   brew install mise                             # or: curl https://mise.run | sh
+   echo 'eval "$(mise activate zsh)"' >> ~/.zshrc  # use bash/fish as appropriate
+   ```
+
+2. From the repository root, trust the config and install the pinned tools:
+
+   ```shell
+   mise trust
+   mise install
+   ```
+
+3. Install the Elixir dependencies (Hex, Rebar and `mix deps.get`):
+
+   ```shell
+   mise run setup
+   ```
+
+4. Optionally, install dbt into the project's Python virtualenv. mise creates `.venv` automatically and activates it whenever you `cd` into the repo:
+
+   ```shell
+   mise run dbt:setup
+   ```
+
+   This installs `dbt-core` and `dbt-postgres`; edit the task in `mise.toml` if your project uses another adapter.
+
+#### Environment
+
+`mise.toml` sets these variables when you're inside the repo:
+
+- `BARD_DBT_PROJECT_DIR` — the dbt project the `dbt:parse` task runs in; defaults to `./dbt_project`. Note this is separate from `BARD_PROJECT_DIR`, which `mix bard.ls`/`mix bard.run` read as their default `--project-dir`.
+- The Python virtualenv at `.venv` (created on first use).
+
+Put machine-specific values and secrets (for example, a different `BARD_DBT_PROJECT_DIR`, or `BARD_PROJECT_DIR`) in a `mise.local.toml` next to `mise.toml`, and keep it out of git:
+
+```toml
+# mise.local.toml
+[env]
+BARD_DBT_PROJECT_DIR = "../your_dbt_project"
+BARD_PROJECT_DIR = "../your_dbt_project"
+```
+
+#### Tasks
+
+Run `mise tasks` to list them, and `mise run <task>` to run one:
+
+| Task        | What it does                                                       |
+| ----------- | ------------------------------------------------------------------ |
+| `setup`     | Install Hex, Rebar and the Elixir dependencies                     |
+| `compile`   | `mix compile`                                                      |
+| `test`      | `mix test`                                                         |
+| `format`    | `mix format`                                                       |
+| `lint`      | `mix format --check-formatted` and `mix compile --warnings-as-errors` |
+| `iex`       | Open `iex -S mix` with the project loaded                          |
+| `dbt:setup` | Install dbt (`dbt-core`, `dbt-postgres`) into `.venv`              |
+| `dbt:parse` | Run `dbt parse` in `BARD_DBT_PROJECT_DIR` to produce `target/manifest.json` |
+
+### Without mise
+
+Install Erlang/OTP 27 and Elixir 1.18 yourself, then:
+
 ```shell
 mix deps.get
 ```
