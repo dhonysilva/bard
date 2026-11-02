@@ -13,7 +13,7 @@ defmodule Bard do
     * `Bard.Selector` - dbt's `--select` syntax over the graph
     * `Bard.Runner` - runs nodes in dependency order, in parallel
     * `Bard.Materialization` - turns a node into a plan of SQL statements
-    * `Bard.Adapter` - talks to a warehouse (Postgres in Phase 2)
+    * `Bard.Adapter` - talks to a warehouse
     * `Bard.Profile` - reads dbt's `profiles.yml`
     * `Bard.Build` - connects runner, materializations and adapter
     * `Bard.RunResults` - writes `run_results.json`

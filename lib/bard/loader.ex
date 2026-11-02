@@ -7,7 +7,7 @@ defmodule Bard.Loader do
   dbt's manifest for Bard's own parser without touching anything else.
   """
 
-  use Boundary, top_level?: true, deps: [Bard], exports: [Manifest]
+  use Boundary, top_level?: true, deps: [Bard, Bard.Compiler], exports: [Files, Manifest]
 
   @callback load(opts :: keyword()) :: {:ok, Bard.Project.t()} | {:error, term()}
 end
