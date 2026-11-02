@@ -1,0 +1,197 @@
+{
+  "block comment then with (one cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)"
+    ],
+    "expected": "/* note */\nwith  __dbt__cte__a as (\nselect 1 as x\n), x as (select 1) select * from x",
+    "sql": "/* note */\nwith x as (select 1) select * from x"
+  },
+  "block comment then with (two cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)",
+      " __dbt__cte__b as (\nselect 2 as y\n)"
+    ],
+    "expected": "/* note */\nwith  __dbt__cte__a as (\nselect 1 as x\n),  __dbt__cte__b as (\nselect 2 as y\n), x as (select 1) select * from x",
+    "sql": "/* note */\nwith x as (select 1) select * from x"
+  },
+  "comment then with (one cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)"
+    ],
+    "expected": "-- note\nwith  __dbt__cte__a as (\nselect 1 as x\n), x as (select 1) select * from x",
+    "sql": "-- note\nwith x as (select 1) select * from x"
+  },
+  "comment then with (two cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)",
+      " __dbt__cte__b as (\nselect 2 as y\n)"
+    ],
+    "expected": "-- note\nwith  __dbt__cte__a as (\nselect 1 as x\n),  __dbt__cte__b as (\nselect 2 as y\n), x as (select 1) select * from x",
+    "sql": "-- note\nwith x as (select 1) select * from x"
+  },
+  "leading block comment (one cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)"
+    ],
+    "expected": "with __dbt__cte__a as (\nselect 1 as x\n) /* a comment */ select 1",
+    "sql": "/* a comment */ select 1"
+  },
+  "leading block comment (two cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)",
+      " __dbt__cte__b as (\nselect 2 as y\n)"
+    ],
+    "expected": "with __dbt__cte__a as (\nselect 1 as x\n),  __dbt__cte__b as (\nselect 2 as y\n) /* a comment */ select 1",
+    "sql": "/* a comment */ select 1"
+  },
+  "leading line comment (one cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)"
+    ],
+    "expected": "with __dbt__cte__a as (\nselect 1 as x\n) -- a comment\nselect 1",
+    "sql": "-- a comment\nselect 1"
+  },
+  "leading line comment (two cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)",
+      " __dbt__cte__b as (\nselect 2 as y\n)"
+    ],
+    "expected": "with __dbt__cte__a as (\nselect 1 as x\n),  __dbt__cte__b as (\nselect 2 as y\n) -- a comment\nselect 1",
+    "sql": "-- a comment\nselect 1"
+  },
+  "leading newlines (one cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)"
+    ],
+    "expected": "\n\nwith __dbt__cte__a as (\nselect 1 as x\n) select * from __dbt__cte__a",
+    "sql": "\n\nselect * from __dbt__cte__a"
+  },
+  "leading newlines (two cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)",
+      " __dbt__cte__b as (\nselect 2 as y\n)"
+    ],
+    "expected": "\n\nwith __dbt__cte__a as (\nselect 1 as x\n),  __dbt__cte__b as (\nselect 2 as y\n) select * from __dbt__cte__a",
+    "sql": "\n\nselect * from __dbt__cte__a"
+  },
+  "leading spaces and tabs (one cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)"
+    ],
+    "expected": "  \t with __dbt__cte__a as (\nselect 1 as x\n) select 1",
+    "sql": "  \t select 1"
+  },
+  "leading spaces and tabs (two cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)",
+      " __dbt__cte__b as (\nselect 2 as y\n)"
+    ],
+    "expected": "  \t with __dbt__cte__a as (\nselect 1 as x\n),  __dbt__cte__b as (\nselect 2 as y\n) select 1",
+    "sql": "  \t select 1"
+  },
+  "parenthesised (one cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)"
+    ],
+    "expected": "with __dbt__cte__a as (\nselect 1 as x\n) (select 1)",
+    "sql": "(select 1)"
+  },
+  "parenthesised (two cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)",
+      " __dbt__cte__b as (\nselect 2 as y\n)"
+    ],
+    "expected": "with __dbt__cte__a as (\nselect 1 as x\n),  __dbt__cte__b as (\nselect 2 as y\n) (select 1)",
+    "sql": "(select 1)"
+  },
+  "plain select (one cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)"
+    ],
+    "expected": "with __dbt__cte__a as (\nselect 1 as x\n) select * from __dbt__cte__a",
+    "sql": "select * from __dbt__cte__a"
+  },
+  "plain select (two cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)",
+      " __dbt__cte__b as (\nselect 2 as y\n)"
+    ],
+    "expected": "with __dbt__cte__a as (\nselect 1 as x\n),  __dbt__cte__b as (\nselect 2 as y\n) select * from __dbt__cte__a",
+    "sql": "select * from __dbt__cte__a"
+  },
+  "uppercase WITH (one cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)"
+    ],
+    "expected": "WITH  __dbt__cte__a as (\nselect 1 as x\n), x AS (SELECT 1) SELECT * FROM x",
+    "sql": "WITH x AS (SELECT 1) SELECT * FROM x"
+  },
+  "uppercase WITH (two cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)",
+      " __dbt__cte__b as (\nselect 2 as y\n)"
+    ],
+    "expected": "WITH  __dbt__cte__a as (\nselect 1 as x\n),  __dbt__cte__b as (\nselect 2 as y\n), x AS (SELECT 1) SELECT * FROM x",
+    "sql": "WITH x AS (SELECT 1) SELECT * FROM x"
+  },
+  "with clause (one cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)"
+    ],
+    "expected": "with  __dbt__cte__a as (\nselect 1 as x\n), x as (select 1) select * from x",
+    "sql": "with x as (select 1) select * from x"
+  },
+  "with clause (two cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)",
+      " __dbt__cte__b as (\nselect 2 as y\n)"
+    ],
+    "expected": "with  __dbt__cte__a as (\nselect 1 as x\n),  __dbt__cte__b as (\nselect 2 as y\n), x as (select 1) select * from x",
+    "sql": "with x as (select 1) select * from x"
+  },
+  "with recursive (one cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)"
+    ],
+    "expected": "with recursive  __dbt__cte__a as (\nselect 1 as x\n), t(n) as (select 1) select * from t",
+    "sql": "with recursive t(n) as (select 1) select * from t"
+  },
+  "with recursive (two cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)",
+      " __dbt__cte__b as (\nselect 2 as y\n)"
+    ],
+    "expected": "with recursive  __dbt__cte__a as (\nselect 1 as x\n),  __dbt__cte__b as (\nselect 2 as y\n), t(n) as (select 1) select * from t",
+    "sql": "with recursive t(n) as (select 1) select * from t"
+  },
+  "with, newline after (one cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)"
+    ],
+    "expected": "with\n   __dbt__cte__a as (\nselect 1 as x\n), x as (select 1)\nselect * from x",
+    "sql": "with\n  x as (select 1)\nselect * from x"
+  },
+  "with, newline after (two cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)",
+      " __dbt__cte__b as (\nselect 2 as y\n)"
+    ],
+    "expected": "with\n   __dbt__cte__a as (\nselect 1 as x\n),  __dbt__cte__b as (\nselect 2 as y\n), x as (select 1)\nselect * from x",
+    "sql": "with\n  x as (select 1)\nselect * from x"
+  },
+  "word starting with with (one cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)"
+    ],
+    "expected": "with __dbt__cte__a as (\nselect 1 as x\n) without_cte as (select 1)",
+    "sql": "without_cte as (select 1)"
+  },
+  "word starting with with (two cte)": {
+    "ctes": [
+      " __dbt__cte__a as (\nselect 1 as x\n)",
+      " __dbt__cte__b as (\nselect 2 as y\n)"
+    ],
+    "expected": "with __dbt__cte__a as (\nselect 1 as x\n),  __dbt__cte__b as (\nselect 2 as y\n) without_cte as (select 1)",
+    "sql": "without_cte as (select 1)"
+  }
+}
