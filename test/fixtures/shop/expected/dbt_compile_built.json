@@ -1,0 +1,193 @@
+{
+  "model.shop.customer_orders": {
+    "alias": null,
+    "compiled_code": "\n\nselect\n    c.customer_id,\n    c.first_name,\n    count(o.order_id) as order_count,\n    max(o.order_date) as last_order_date\nfrom \"bard\".\"shop_dev\".\"stg_customers\" as c\njoin \"bard\".\"shop_dev\".\"orders\" as o on o.customer_id = c.customer_id\n\nwhere o.order_date >= (select coalesce(max(last_order_date), '1900-01-01') from \"bard\".\"shop_dev\".\"customer_orders\")\n\ngroup by c.customer_id, c.first_name",
+    "depends_on": [
+      "model.shop.orders",
+      "model.shop.stg_customers"
+    ],
+    "fqn": [
+      "shop",
+      "marts",
+      "customer_orders"
+    ],
+    "materialized": "incremental",
+    "relation_name": "\"bard\".\"shop_dev\".\"customer_orders\"",
+    "resource_type": "model",
+    "schema": null,
+    "tags": [
+      "marts"
+    ]
+  },
+  "model.shop.orders": {
+    "alias": null,
+    "compiled_code": "with  __dbt__cte__payments_eph as (\n\n\nselect order_id, payment_method, amount\nfrom \"bard\".\"shop_dev\".\"stg_payments\"\nwhere amount > 0\n), payments as (\n    select * from __dbt__cte__payments_eph\n),\n\norder_payments as (\n    select\n        order_id,\n        sum(case when payment_method = 'credit_card' then amount else 0 end) as credit_card_amount,\n        sum(case when payment_method = 'coupon' then amount else 0 end) as coupon_amount,\n        sum(case when payment_method = 'bank_transfer' then amount else 0 end) as bank_transfer_amount\n        \n    from payments\n    group by order_id\n)\n\nselect\n    o.order_id,\n    o.customer_id,\n    o.order_date,\n    o.status,\n    coalesce(p.credit_card_amount, 0) as credit_card_amount, coalesce(p.coupon_amount, 0) as coupon_amount, coalesce(p.bank_transfer_amount, 0) as bank_transfer_amount, \n    'us' as region\nfrom \"bard\".\"shop_dev\".\"orders_staging\" as o\nleft join order_payments as p on p.order_id = o.order_id\n\nwhere o.status = 'completed'\n",
+    "depends_on": [
+      "model.shop.payments_eph",
+      "model.shop.stg_orders"
+    ],
+    "fqn": [
+      "shop",
+      "marts",
+      "orders"
+    ],
+    "materialized": "table",
+    "relation_name": "\"bard\".\"shop_dev\".\"orders\"",
+    "resource_type": "model",
+    "schema": null,
+    "tags": [
+      "marts"
+    ]
+  },
+  "model.shop.payments_eph": {
+    "alias": null,
+    "compiled_code": "\n\nselect order_id, payment_method, amount\nfrom \"bard\".\"shop_dev\".\"stg_payments\"\nwhere amount > 0",
+    "depends_on": [
+      "model.shop.stg_payments"
+    ],
+    "fqn": [
+      "shop",
+      "marts",
+      "payments_eph"
+    ],
+    "materialized": "ephemeral",
+    "relation_name": null,
+    "resource_type": "model",
+    "schema": null,
+    "tags": [
+      "marts"
+    ]
+  },
+  "model.shop.revenue": {
+    "alias": "revenue_by_method",
+    "compiled_code": "with __dbt__cte__payments_eph as (\n\n\nselect order_id, payment_method, amount\nfrom \"bard\".\"shop_dev\".\"stg_payments\"\nwhere amount > 0\n) select\n    payment_method,\n    sum(amount) as revenue\nfrom __dbt__cte__payments_eph\ngroup by payment_method",
+    "depends_on": [
+      "model.shop.payments_eph"
+    ],
+    "fqn": [
+      "shop",
+      "marts",
+      "finance",
+      "revenue"
+    ],
+    "materialized": "table",
+    "relation_name": "\"bard\".\"shop_dev_finance\".\"revenue_by_method\"",
+    "resource_type": "model",
+    "schema": "finance",
+    "tags": [
+      "finance",
+      "marts"
+    ]
+  },
+  "model.shop.stg_customers": {
+    "alias": null,
+    "compiled_code": "select\n    id as customer_id,\n    first_name,\n    last_name\nfrom \"bard\".\"shop_dev_raw\".\"raw_customers\"",
+    "depends_on": [
+      "seed.shop.raw_customers"
+    ],
+    "fqn": [
+      "shop",
+      "staging",
+      "stg_customers"
+    ],
+    "materialized": "view",
+    "relation_name": "\"bard\".\"shop_dev\".\"stg_customers\"",
+    "resource_type": "model",
+    "schema": null,
+    "tags": [
+      "pii"
+    ]
+  },
+  "model.shop.stg_orders": {
+    "alias": "orders_staging",
+    "compiled_code": "\n\nselect\n    id as order_id,\n    user_id as customer_id,\n    order_date,\n    status\nfrom \"bard\".\"shop_dev_raw\".\"raw_orders\"",
+    "depends_on": [
+      "seed.shop.raw_orders"
+    ],
+    "fqn": [
+      "shop",
+      "staging",
+      "stg_orders"
+    ],
+    "materialized": "view",
+    "relation_name": "\"bard\".\"shop_dev\".\"orders_staging\"",
+    "resource_type": "model",
+    "schema": null,
+    "tags": []
+  },
+  "model.shop.stg_payments": {
+    "alias": null,
+    "compiled_code": "\nselect\n    id as payment_id,\n    order_id,\n    payment_method,\n    round(amount / 100.0, 2) as amount\nfrom \"bard\".\"shop_dev_raw\".\"raw_payments\"",
+    "depends_on": [
+      "source.shop.shop_raw.payments"
+    ],
+    "fqn": [
+      "shop",
+      "staging",
+      "stg_payments"
+    ],
+    "materialized": "view",
+    "relation_name": "\"bard\".\"shop_dev\".\"stg_payments\"",
+    "resource_type": "model",
+    "schema": null,
+    "tags": []
+  },
+  "seed.shop.raw_customers": {
+    "alias": null,
+    "compiled_code": null,
+    "depends_on": [],
+    "fqn": [
+      "shop",
+      "raw_customers"
+    ],
+    "materialized": "seed",
+    "relation_name": "\"bard\".\"shop_dev_raw\".\"raw_customers\"",
+    "resource_type": "seed",
+    "schema": "raw",
+    "tags": []
+  },
+  "seed.shop.raw_orders": {
+    "alias": null,
+    "compiled_code": null,
+    "depends_on": [],
+    "fqn": [
+      "shop",
+      "raw_orders"
+    ],
+    "materialized": "seed",
+    "relation_name": "\"bard\".\"shop_dev_raw\".\"raw_orders\"",
+    "resource_type": "seed",
+    "schema": "raw",
+    "tags": []
+  },
+  "seed.shop.raw_payments": {
+    "alias": null,
+    "compiled_code": null,
+    "depends_on": [],
+    "fqn": [
+      "shop",
+      "raw_payments"
+    ],
+    "materialized": "seed",
+    "relation_name": "\"bard\".\"shop_dev_raw\".\"raw_payments\"",
+    "resource_type": "seed",
+    "schema": "raw",
+    "tags": []
+  },
+  "source.shop.shop_raw.payments": {
+    "alias": null,
+    "compiled_code": null,
+    "depends_on": [],
+    "fqn": [
+      "shop",
+      "staging",
+      "shop_raw",
+      "payments"
+    ],
+    "materialized": null,
+    "relation_name": "\"bard\".\"shop_dev_raw\".\"raw_payments\"",
+    "resource_type": "source",
+    "schema": null,
+    "tags": []
+  }
+}

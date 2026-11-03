@@ -1,0 +1,25 @@
+name: shop
+version: "1.0"
+config-version: 2
+profile: shop
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+
+vars:
+  status_filter: completed
+  min_amount: 0
+
+models:
+  shop:
+    +materialized: view
+    marts:
+      +materialized: table
+      +tags: ["marts"]
+      finance:
+        +schema: finance
+
+seeds:
+  shop:
+    +schema: raw

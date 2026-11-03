@@ -32,8 +32,9 @@ defmodule Bard.Compiler.Yaml do
       {:ok, _other} ->
         {:error, Diagnostic.new("BARD002", "expected a mapping at the top level", file: file)}
 
+      # YamlElixir returns FileNotFoundError or ParsingError here.
       {:error, error} ->
-        message = if is_exception(error), do: Exception.message(error), else: inspect(error)
+        message = Exception.message(error)
         {:error, Diagnostic.new("BARD002", "invalid YAML: #{message}", file: file)}
     end
   end

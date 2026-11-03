@@ -1,0 +1,7 @@
+version: 2
+
+models:
+  - name: revenue
+    config:
+      alias: revenue_by_method
+      tags: ["finance"]

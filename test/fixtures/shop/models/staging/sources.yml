@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: shop_raw
+    schema: "{{ target.schema }}_raw"
+    tables:
+      - name: payments
+        identifier: raw_payments
