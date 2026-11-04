@@ -46,7 +46,13 @@ defmodule Bard.Test.FakeAdapter do
   @impl true
   def transaction(conn, statements) do
     Agent.get_and_update(conn, fn state ->
-      if state.fail_on && Enum.any?(statements, &Regex.match?(state.fail_on, &1)) do
+      sqls =
+        Enum.map(statements, fn
+          {sql, _params} -> sql
+          sql -> sql
+        end)
+
+      if state.fail_on && Enum.any?(sqls, &Regex.match?(state.fail_on, &1)) do
         {{:error, :fake_failure}, state}
       else
         {{:ok, %{rows_affected: nil}}, %{state | statements: state.statements ++ statements}}
@@ -55,7 +61,10 @@ defmodule Bard.Test.FakeAdapter do
   end
 
   @impl true
-  def query(_conn, _sql), do: {:ok, []}
+  def query(conn, sql), do: query(conn, sql, [])
+
+  @impl true
+  def query(_conn, _sql, _params), do: {:ok, []}
 
   def statements(conn), do: Agent.get(conn, & &1.statements)
   def schemas(conn), do: Agent.get(conn, & &1.schemas)
