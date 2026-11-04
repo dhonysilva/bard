@@ -87,8 +87,10 @@ defmodule Bard.Adapter.Postgres do
     Postgrex.transaction(
       pool,
       fn conn ->
-        Enum.reduce(statements, nil, fn sql, rows ->
-          case Postgrex.query(conn, sql, [], @no_timeout) do
+        Enum.reduce(statements, nil, fn statement, rows ->
+          {sql, params} = with sql when is_binary(sql) <- statement, do: {sql, []}
+
+          case Postgrex.query(conn, sql, params, @no_timeout) do
             # CREATE TABLE AS reports SELECT n; incremental inserts report INSERT n.
             {:ok, %{command: command, num_rows: n}} when command in [:select, :insert] -> n
             {:ok, _} -> rows
@@ -105,8 +107,11 @@ defmodule Bard.Adapter.Postgres do
   end
 
   @impl true
-  def query(pool, sql) do
-    case Postgrex.query(pool, sql, [], @no_timeout) do
+  def query(pool, sql), do: query(pool, sql, [])
+
+  @impl true
+  def query(pool, sql, params) do
+    case Postgrex.query(pool, sql, params, @no_timeout) do
       {:ok, %{rows: rows}} -> {:ok, rows || []}
       {:error, error} -> {:error, Exception.message(error)}
     end

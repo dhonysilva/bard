@@ -34,13 +34,19 @@ defmodule Bard.Adapter do
   @doc "Describes the relation currently in the warehouse, or nil."
   @callback describe(conn, Relation.t()) :: {:ok, existing} | {:error, term()}
 
+  @typedoc "SQL alone, or SQL with `$1`-style parameters."
+  @type statement :: String.t() | {String.t(), [term()]}
+
   @doc """
   Runs statements in one transaction. Returns the rows affected by the
   statement that builds the model (the last one that reports a count).
   """
-  @callback transaction(conn, [String.t()]) ::
+  @callback transaction(conn, [statement()]) ::
               {:ok, %{rows_affected: non_neg_integer() | nil}} | {:error, term()}
 
   @doc "Runs one query and returns its rows. Used by parity checks and tests."
   @callback query(conn, String.t()) :: {:ok, [[term()]]} | {:error, term()}
+
+  @doc "Runs one query with `$1`-style parameters and returns its rows."
+  @callback query(conn, String.t(), [term()]) :: {:ok, [[term()]]} | {:error, term()}
 end
