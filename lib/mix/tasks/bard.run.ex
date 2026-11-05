@@ -7,8 +7,10 @@ defmodule Mix.Tasks.Bard.Run do
       dbt compile --target dev
       mix bard.run --project-dir ../analytics_dbt --target dev --select +orders
 
-  dbt still compiles the SQL in Phase 2, so run `dbt compile` with the same
-  target first. Results go to `<project>/bard_target/run_results.json`.
+  By default the SQL comes from dbt's manifest, so run `dbt compile` with the
+  same target first. With `--compile`, Bard compiles the project itself
+  (Phase 3) and no dbt is needed. Results go to
+  `<project>/bard_target/run_results.json`.
 
   ## Options
 
@@ -19,8 +21,12 @@ defmodule Mix.Tasks.Bard.Run do
     * `-s`, `--select` and `--exclude` - repeatable, dbt's syntax
     * `--threads` - models running at once; defaults to the target's `threads`
     * `--retries` - extra attempts for a failed model; defaults to 0
-    * `--full-refresh` - rebuild incremental models from scratch (compile
-      with `dbt compile --full-refresh` too)
+    * `--full-refresh` - rebuild incremental models from scratch (without
+      `--compile`, compile with `dbt compile --full-refresh` too)
+    * `--compile` - compile with Bard instead of reading dbt's manifest
+    * `--vars` - with `--compile`: YAML or JSON, as for `dbt --vars`
+    * `--fallback-manifest` - with `--compile`: dbt's SQL for models Bard
+      cannot compile
 
   Exits with status 1 when any model fails.
   """
@@ -39,7 +45,10 @@ defmodule Mix.Tasks.Bard.Run do
     exclude: :keep,
     threads: :integer,
     retries: :integer,
-    full_refresh: :boolean
+    full_refresh: :boolean,
+    compile: :boolean,
+    vars: :string,
+    fallback_manifest: :string
   ]
 
   @impl Mix.Task
@@ -53,6 +62,12 @@ defmodule Mix.Tasks.Bard.Run do
     # Starts Postgrex and the other dependencies.
     Mix.Task.run("app.start")
 
+    vars =
+      case CLI.parse_vars(opts[:vars]) do
+        {:ok, vars} -> vars
+        {:error, reason} -> Mix.raise(CLI.format_error(reason))
+      end
+
     run_opts = [
       project_dir: CLI.project_dir(opts[:project_dir]),
       target_path: Keyword.get(opts, :target_path, "target"),
@@ -62,7 +77,10 @@ defmodule Mix.Tasks.Bard.Run do
       exclude: Keyword.get_values(opts, :exclude),
       threads: opts[:threads],
       retries: opts[:retries],
-      full_refresh: opts[:full_refresh]
+      full_refresh: opts[:full_refresh],
+      compile: opts[:compile] || false,
+      vars: vars,
+      fallback_manifest: opts[:fallback_manifest]
     ]
 
     case CLI.Run.run(run_opts, &Mix.shell().info/1) do

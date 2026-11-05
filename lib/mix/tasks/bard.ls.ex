@@ -33,7 +33,11 @@ defmodule Mix.Tasks.Bard.Ls do
     exclude: :keep,
     resource_type: :keep,
     output: :string,
-    indirect_selection: :string
+    indirect_selection: :string,
+    compile: :boolean,
+    profiles_dir: :string,
+    target: :string,
+    vars: :string
   ]
 
   @outputs %{"selector" => :selector, "name" => :name, "path" => :path, "json" => :json}
@@ -47,6 +51,18 @@ defmodule Mix.Tasks.Bard.Ls do
   }
 
   @indirect %{"eager" => :eager, "empty" => :empty}
+
+  defp load(opts, project_dir, load_opts) do
+    if opts[:compile] do
+      with {:ok, vars} <- CLI.parse_vars(opts[:vars]),
+           {:ok, target} <-
+             Bard.Profile.load(project_dir, Keyword.take(opts, [:profiles_dir, :target])) do
+        CLI.compile_project(project_dir, target, nil, vars: vars, compile: false)
+      end
+    else
+      CLI.load_project(load_opts)
+    end
+  end
 
   @impl Mix.Task
   def run(args) do
@@ -75,7 +91,7 @@ defmodule Mix.Tasks.Bard.Ls do
         )
     ]
 
-    with {:ok, project} <- CLI.load_project(load_opts),
+    with {:ok, project} <- load(opts, project_dir, load_opts),
          {:ok, lines} <- Ls.run(project, ls_opts) do
       Enum.each(lines, &Mix.shell().info/1)
     else
