@@ -2,10 +2,14 @@ defmodule Bard.CLI.Run do
   @moduledoc """
   `bard run`: builds the selected models, like `dbt run`.
 
-  The SQL comes from dbt, so compile first with the same target:
+  The SQL comes from dbt's manifest, so compile first with the same target:
 
       dbt compile --target prod
       mix bard.run --target prod --select +orders
+
+  Or let Bard compile the project itself (Phase 3), no dbt needed:
+
+      mix bard.run --compile --target prod --select +orders
 
   Progress lines are printed as models finish, through a Telemetry handler
   on the runner's events. Results are written to
@@ -19,8 +23,6 @@ defmodule Bard.CLI.Run do
   alias Bard.RunResults
   alias Bard.Selector
 
-  @adapters %{"postgres" => Bard.Adapter.Postgres}
-
   @type summary :: %{
           pass: non_neg_integer(),
           error: non_neg_integer(),
@@ -31,7 +33,9 @@ defmodule Bard.CLI.Run do
 
   @doc """
   Options: `:project_dir`, `:target_path`, `:profiles_dir`, `:target`,
-  `:select`, `:exclude`, `:threads`, `:retries`, `:full_refresh`.
+  `:select`, `:exclude`, `:threads`, `:retries`, `:full_refresh`, and for
+  Bard's compiler `:compile` (compile with Bard instead of reading dbt's
+  manifest), `:vars` and `:fallback_manifest`.
   `print` receives each progress line.
   """
 
@@ -40,42 +44,57 @@ defmodule Bard.CLI.Run do
     project_dir = Keyword.fetch!(opts, :project_dir)
     started = System.monotonic_time(:millisecond)
 
-    with {:ok, project} <-
-           CLI.load_project(
-             project_dir: project_dir,
-             target_path: Keyword.get(opts, :target_path, "target")
-           ),
-         {:ok, target} <- Profile.load(project_dir, Keyword.take(opts, [:profiles_dir, :target])),
-         {:ok, adapter} <- adapter(target),
-         {:ok, ids} <- select(project, opts) do
+    with {:ok, target} <- Profile.load(project_dir, Keyword.take(opts, [:profiles_dir, :target])),
+         {:ok, adapter} <- CLI.adapter(target) do
       threads = opts[:threads] || Map.get(target, :threads, 4)
-      nodes = Build.runnable(project, ids)
 
-      print.(
-        "Running #{length(nodes)} models on #{target.profile}.#{target.name} with #{threads} threads"
-      )
-
+      # The connection is opened first: Bard's compiler asks the warehouse
+      # what exists, for is_incremental().
       with {:ok, conn} <- adapter.connect(Map.put(target, :threads, threads)) do
         try do
-          handler = attach_progress(project, length(nodes), print)
+          with {:ok, project} <- load(project_dir, target, {adapter, conn}, opts),
+               {:ok, ids} <- select(project, opts) do
+            nodes = Build.runnable(project, ids)
 
-          try do
-            build_opts = [
-              threads: threads,
-              retries: opts[:retries] || 0,
-              full_refresh: opts[:full_refresh] || false
-            ]
+            print.(
+              "Running #{length(nodes)} models on #{target.profile}.#{target.name} with #{threads} threads"
+            )
 
-            with {:ok, results} <- Build.run(project, ids, adapter, conn, build_opts) do
-              finish(project, project_dir, results, started, print)
+            handler = attach_progress(project, length(nodes), print)
+
+            try do
+              build_opts = [
+                threads: threads,
+                retries: opts[:retries] || 0,
+                full_refresh: opts[:full_refresh] || false
+              ]
+
+              with {:ok, results} <- Build.run(project, ids, adapter, conn, build_opts) do
+                finish(project, project_dir, results, started, print)
+              end
+            after
+              :telemetry.detach(handler)
             end
-          after
-            :telemetry.detach(handler)
           end
         after
           adapter.disconnect(conn)
         end
       end
+    end
+  end
+
+  defp load(project_dir, target, connection, opts) do
+    if opts[:compile] do
+      CLI.compile_project(project_dir, target, connection,
+        vars: opts[:vars] || %{},
+        full_refresh: opts[:full_refresh] || false,
+        fallback_manifest: opts[:fallback_manifest]
+      )
+    else
+      CLI.load_project(
+        project_dir: project_dir,
+        target_path: Keyword.get(opts, :target_path, "target")
+      )
     end
   end
 
@@ -86,13 +105,6 @@ defmodule Bard.CLI.Run do
       resource_types: [:model],
       indirect_selection: :empty
     )
-  end
-
-  defp adapter(%{type: type}) do
-    case Map.fetch(@adapters, type) do
-      {:ok, module} -> {:ok, module}
-      :error -> {:error, {:unsupported_adapter, type}}
-    end
   end
 
   defp attach_progress(project, total, print) do
@@ -129,8 +141,7 @@ defmodule Bard.CLI.Run do
   end
 
   defp progress(config, text) do
-    :counters.add(config.counter, 1, 1)
-    n = :counters.get(config.counter, 1)
+    n = :counters.add(config.counter, 1, 1) && :counters.get(config.counter, 1)
     width = config.total |> Integer.to_string() |> String.length()
     "#{n |> Integer.to_string() |> String.pad_leading(width)} of #{config.total}  #{text}"
   end
