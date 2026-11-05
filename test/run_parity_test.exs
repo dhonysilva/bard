@@ -59,4 +59,32 @@ defmodule Bard.RunParityTest do
              "round #{round}: #{length(differences)} models differ:\n#{inspect(differences, pretty: true)}"
     end
   end
+
+  # Bard compiles the SQL itself; dbt only builds the reference.
+  test "two rounds of bard run --compile match dbt run, model by model", ctx do
+    for round <- 1..2 do
+      RunParity.dbt!(ctx.dir, ["run", "--target", ctx.dbt_target])
+      dbt_relations = RunParity.relations(ctx.dir)
+
+      assert {:ok, %{error: 0, skip: 0}} =
+               Bard.CLI.Run.run(
+                 [project_dir: ctx.dir, target: ctx.bard_target, compile: true],
+                 fn _ -> :ok end
+               )
+
+      {:ok, target} = Bard.Profile.load(ctx.dir, target: ctx.bard_target)
+      {:ok, bard} = Bard.CLI.compile_project(ctx.dir, target, nil, compile: false)
+
+      bard_relations =
+        for node <- Bard.Project.nodes(bard),
+            Map.has_key?(dbt_relations, node.unique_id),
+            into: %{},
+            do: {node.unique_id, node.relation_name}
+
+      differences = RunParity.compare(Postgres, ctx.conn, dbt_relations, bard_relations)
+
+      assert differences == [],
+             "round #{round}: #{length(differences)} models differ:\n#{inspect(differences, pretty: true)}"
+    end
+  end
 end
