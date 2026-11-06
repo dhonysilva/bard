@@ -77,6 +77,9 @@ Run `mise tasks` to list them, and `mise run <task>` to run one:
 | `iex`       | Open `iex -S mix` with the project loaded                          |
 | `dbt:setup` | Install dbt (`dbt-core`, `dbt-postgres`) into `.venv`              |
 | `dbt:parse` | Run `dbt parse` in `BARD_DBT_PROJECT_DIR` to produce `target/manifest.json` |
+| `db:up`     | Start the test Postgres from `docker-compose.yml` and wait until it's ready |
+| `db:down`   | Stop and remove the test Postgres                                  |
+| `test:pg`   | `mix test --only postgres` (needs `db:up` first)                   |
 
 ### Without mise
 

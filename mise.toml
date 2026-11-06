@@ -43,3 +43,15 @@ run = "pip install dbt-core dbt-postgres"
 description = "Generate dbt's manifest.json, useful as a reference for Bard's parser"
 dir = "{{env.BARD_DBT_PROJECT_DIR}}"
 run = "dbt parse"
+
+[tasks."db:up"]
+description = "Start the test Postgres (docker compose) and wait until it's healthy"
+run = "docker compose up -d --wait"
+
+[tasks."db:down"]
+description = "Stop and remove the test Postgres"
+run = "docker compose down"
+
+[tasks."test:pg"]
+description = "Run the tests that need Postgres"
+run = "mix test --only postgres"

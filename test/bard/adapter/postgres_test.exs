@@ -2,7 +2,7 @@ defmodule Bard.Adapter.PostgresTest do
   @moduledoc """
   Runs against a real Postgres. Excluded by default:
 
-      docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:16
+      docker compose up -d --wait
       mix test --only postgres
 
   Connection settings come from BARD_TEST_PG_HOST, _PORT, _USER, _PASSWORD and
