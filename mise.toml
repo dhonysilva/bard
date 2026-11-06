@@ -3,12 +3,16 @@ erlang = "27"
 elixir = "1.18-otp-27"
 # Python + dbt to run the existing dbt project and compare results with Bard
 python = "3.12"
+# Manages dbt from pyproject.toml / uv.lock into .venv
+uv = "latest"
+
+[settings]
+# Activate uv's .venv (created by `mise run dbt:setup`) when inside the repo
+python.uv_venv_auto = true
 
 [env]
 # Points to the existing dbt project that Bard will read/parse (adjust the path)
 BARD_DBT_PROJECT_DIR = "./dbt_project"
-# Automatically activates the Python venv (created with `mise run dbt:setup`)
-_.python.venv = { path = ".venv", create = true }
 # Local variables/secrets go in mise.local.toml (add it to .gitignore)
 
 [tasks.setup]
@@ -36,8 +40,12 @@ description = "Open IEx with the project loaded"
 run = "iex -S mix"
 
 [tasks."dbt:setup"]
-description = "Install dbt in the local venv (adjust the adapter)"
-run = "pip install dbt-core dbt-postgres"
+description = "Install dbt from uv.lock into .venv"
+run = "uv sync"
+
+[tasks."dbt:upgrade"]
+description = "Upgrade dbt in uv.lock and reinstall"
+run = "uv lock --upgrade && uv sync"
 
 [tasks."dbt:parse"]
 description = "Generate dbt's manifest.json, useful as a reference for Bard's parser"
