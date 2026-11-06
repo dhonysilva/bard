@@ -1,8 +1,8 @@
 """Expected CTE injection, from dbt itself.
 
-Run with the Python that has dbt-core installed:
+Run from this folder with the project's uv environment (`uv sync` first):
 
-    python3 generate_cases.py > cases.json
+    uv run python generate_cases.py > cases.json
 """
 import json
 from dbt.compilation import inject_ctes_into_sql

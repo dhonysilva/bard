@@ -1,0 +1,11 @@
+# Python tooling for Bard's development: dbt, used by the parity tests and
+# test/fixtures/ctes/generate_cases.py. Not a package. Install with `uv sync`
+# (or `mise run dbt:setup`); add another adapter with `uv add dbt-<adapter>`.
+[project]
+name = "bard-dbt-tooling"
+version = "0"
+requires-python = ">=3.12,<3.13"
+dependencies = ["dbt-core", "dbt-postgres"]
+
+[tool.uv]
+package = false

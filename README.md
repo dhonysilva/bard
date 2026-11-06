@@ -17,7 +17,7 @@ Requires Elixir `~> 1.18` and a dbt project you can run `dbt parse` (and, for `b
 
 ### With mise (recommended)
 
-The repository pins its toolchain in `mise.toml` with [mise](https://mise.jdx.dev): Erlang 27, Elixir 1.18 (OTP 27) and Python 3.12 (used to run dbt alongside Bard).
+The repository pins its toolchain in `mise.toml` with [mise](https://mise.jdx.dev): Erlang 27, Elixir 1.18 (OTP 27), Python 3.12 and uv (used to install and run dbt alongside Bard).
 
 1. Install mise and hook it into your shell (see the [mise getting started guide](https://mise.jdx.dev/getting-started.html)):
 
@@ -39,20 +39,20 @@ The repository pins its toolchain in `mise.toml` with [mise](https://mise.jdx.de
    mise run setup
    ```
 
-4. Optionally, install dbt into the project's Python virtualenv. mise creates `.venv` automatically and activates it whenever you `cd` into the repo:
+4. Optionally, install dbt into the project's Python virtualenv. [uv](https://docs.astral.sh/uv/) creates `.venv` from `pyproject.toml` and `uv.lock`, and mise activates it whenever you `cd` into the repo:
 
    ```shell
-   mise run dbt:setup
+   mise run dbt:setup   # uv sync
    ```
 
-   This installs `dbt-core` and `dbt-postgres`; edit the task in `mise.toml` if your project uses another adapter.
+   This installs the locked `dbt-core` and `dbt-postgres`; add another adapter with `uv add dbt-<adapter>`. Without mise, `uv run dbt ...` works too.
 
 #### Environment
 
 `mise.toml` sets these variables when you're inside the repo:
 
 - `BARD_DBT_PROJECT_DIR` — the dbt project the `dbt:parse` task runs in; defaults to `./dbt_project`. Note this is separate from `BARD_PROJECT_DIR`, which `mix bard.ls`/`mix bard.run` read as their default `--project-dir`.
-- The Python virtualenv at `.venv` (created on first use).
+- The Python virtualenv at `.venv` (created by `uv sync`, activated automatically).
 
 Put machine-specific values and secrets (for example, a different `BARD_DBT_PROJECT_DIR`, or `BARD_PROJECT_DIR`) in a `mise.local.toml` next to `mise.toml`, and keep it out of git:
 
@@ -75,7 +75,8 @@ Run `mise tasks` to list them, and `mise run <task>` to run one:
 | `format`    | `mix format`                                                       |
 | `lint`      | `mix format --check-formatted` and `mix compile --warnings-as-errors` |
 | `iex`       | Open `iex -S mix` with the project loaded                          |
-| `dbt:setup` | Install dbt (`dbt-core`, `dbt-postgres`) into `.venv`              |
+| `dbt:setup` | Install dbt from `uv.lock` into `.venv` (`uv sync`)                |
+| `dbt:upgrade` | Upgrade dbt in `uv.lock` and reinstall                           |
 | `dbt:parse` | Run `dbt parse` in `BARD_DBT_PROJECT_DIR` to produce `target/manifest.json` |
 | `db:up`     | Start the test Postgres from `docker-compose.yml` and wait until it's ready |
 | `db:down`   | Stop and remove the test Postgres                                  |
