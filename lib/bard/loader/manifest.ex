@@ -133,6 +133,7 @@ defmodule Bard.Loader.Manifest do
       raw_code: raw["raw_code"],
       compiled_code: raw["compiled_code"],
       compiled_by: if(raw["compiled_code"], do: :dbt),
+      relation_name: raw["relation_name"],
       checksum: get_in(raw, ["checksum", "checksum"]),
       depends_on: get_in(raw, ["depends_on", "nodes"]) || [],
       config: config(raw),
@@ -150,6 +151,7 @@ defmodule Bard.Loader.Manifest do
       fqn: raw["fqn"] || [],
       path: raw["path"],
       original_file_path: raw["original_file_path"],
+      relation_name: raw["relation_name"],
       depends_on: [],
       config: config(raw),
       columns: raw["columns"] || %{}
